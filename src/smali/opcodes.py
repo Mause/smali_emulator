@@ -579,3 +579,19 @@ class op_AddInt2Addr(OpCode):
         vm[source_and_dest] = result
 
 
+class op_NegInt(OpCode):
+    def __init__(self):
+        OpCode.__init__(self, r'^neg-int (.+),\s*(.+)')
+
+    @staticmethod
+    def eval(vm, dest, source):
+        """
+        >>> vm = {'v0': 1, 'v1': 2}
+        >>> # perform v1 + v2 and store the result into v1
+        >>> op_AddInt2Addr.eval(vm, 'v0', 'v1')
+        >>> vm
+        {'v0': -6, 'v1': 6}
+        """
+        vm[dest] = -vm[source]
+
+
