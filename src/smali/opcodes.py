@@ -32,7 +32,8 @@ class OpCode(object):
 
     @staticmethod
     def get_int_value(val):
-        val = val.rstrip('t')
+        val = val.rstrip('t')  # for byte elements
+        val = val.rstrip('s')  # for short elements
         return ast.literal_eval(val)
 
     def parse(self, line, vm):
