@@ -537,3 +537,45 @@ class op_PackedSwitch(OpCode):
         case_label = cases[case_idx]
 
         vm.goto(case_label)
+
+class op_RSubInt(OpCode):
+    def __init__(self):
+        OpCode.__init__(self, '^rsub-int/lit(\d+) (.+),\s*(.+),\s*(.+)')
+
+    @staticmethod
+    def eval(vm, register_size, destination, source, constant):
+        """
+        >>> vm = {'v0': 1, 'v1': 2, 'v2': 4}
+        >>> # perform v1 - 0x3 and store the result into v2
+        >>> op_RSubInt.eval(vm, 8, 'v2', 'v1', '0x3')
+        >>> vm  # v2 is 0x3 - v1 = 0x3 - 2 = 1
+        {'v0': 1, 'v1': 2, 'v2': 1}
+        """
+        register_size = int(register_size)  # 8, 16 or 32 bytes
+        source = vm[source]
+        constant = OpCode.get_int_value(constant)
+        result = constant - source
+        assert all(-(2 ** (register_size - 1)) <= x <= (2 ** (register_size - 1) - 1)
+                   for x in (source, constant, result))
+        vm[destination] = result
+
+
+class op_AddInt2Addr(OpCode):
+    def __init__(self):
+        OpCode.__init__(self, r'^add-int/2addr (.+),\s*(.+)')
+
+    @staticmethod
+    def eval(vm, source_and_dest, source_register):
+        """
+        >>> vm = {'v0': 1, 'v1': 2, 'v2': 4}
+        >>> # perform v1 + v2 and store the result into v1
+        >>> op_AddInt2Addr.eval(vm, 'v1', 'v2')
+        >>> vm
+        {'v0': 1, 'v1': 6, 'v2': 4}
+        """
+        source1 = vm[source_register]
+        source2 = vm[source_and_dest]
+        result = source1 + source2
+        vm[source_and_dest] = result
+
+
