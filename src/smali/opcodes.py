@@ -569,9 +569,9 @@ class op_RSubInt(OpCode):
         """
         >>> vm = {'v0': 1, 'v1': 2, 'v2': 4}
         >>> # perform v1 - 0x3 and store the result into v2
-        >>> op_RSubInt.eval(vm, 8, 'v2', 'v1', '0x32')
-        >>> vm  # v2 is 0x3 - v1 = 0x3 - 2 = 1
-        {'v0': 1, 'v1': 2, 'v2': -46}
+        >>> op_RSubInt.eval(vm, 'v2', 'v1', '0x32')
+        >>> vm  # v2 is 0x32 - v1 = 0x32 - 2 = 48
+        {'v0': 1, 'v1': 2, 'v2': 48}
         """
         source = vm[source]
         constant = OpCode.get_int_value(constant)
@@ -606,10 +606,10 @@ class op_NegInt(OpCode):
     def eval(vm, dest, source):
         """
         >>> vm = {'v0': 1, 'v1': 2}
-        >>> # perform v1 + v2 and store the result into v1
+        >>> # perform v0 + v1 and store the result into v0
         >>> op_AddInt2Addr.eval(vm, 'v0', 'v1')
         >>> vm
-        {'v0': -6, 'v1': 6}
+        {'v0': 3, 'v1': 2}
         """
         vm[dest] = -vm[source]
 
