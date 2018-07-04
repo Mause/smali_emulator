@@ -539,7 +539,7 @@ class op_PackedSwitch(OpCode):
 
         vm.goto(case_label)
 
-class op_RSubInt(OpCode):
+class op_RSubIntLiteral(OpCode):
     def __init__(self):
         OpCode.__init__(self, '^rsub-int/lit(\d+) (.+),\s*(.+),\s*(.+)')
 
@@ -548,7 +548,7 @@ class op_RSubInt(OpCode):
         """
         >>> vm = {'v0': 1, 'v1': 2, 'v2': 4}
         >>> # perform v1 - 0x3 and store the result into v2
-        >>> op_RSubInt.eval(vm, 8, 'v2', 'v1', '0x3')
+        >>> op_RSubIntLiteral.eval(vm, 8, 'v2', 'v1', '0x3')
         >>> vm  # v2 is 0x3 - v1 = 0x3 - 2 = 1
         {'v0': 1, 'v1': 2, 'v2': 1}
         """
@@ -558,6 +558,24 @@ class op_RSubInt(OpCode):
         result = constant - source
         assert all(-(2 ** (register_size - 1)) <= x <= (2 ** (register_size - 1) - 1)
                    for x in (source, constant, result))
+        vm[destination] = result
+
+class op_RSubInt(OpCode):
+    def __init__(self):
+        OpCode.__init__(self, '^rsub-int\s*(.+),\s*(.+),\s*(.+)')
+
+    @staticmethod
+    def eval(vm, destination, source, constant):
+        """
+        >>> vm = {'v0': 1, 'v1': 2, 'v2': 4}
+        >>> # perform v1 - 0x3 and store the result into v2
+        >>> op_RSubInt.eval(vm, 8, 'v2', 'v1', '0x32')
+        >>> vm  # v2 is 0x3 - v1 = 0x3 - 2 = 1
+        {'v0': 1, 'v1': 2, 'v2': -46}
+        """
+        source = vm[source]
+        constant = OpCode.get_int_value(constant)
+        result = constant - source
         vm[destination] = result
 
 
