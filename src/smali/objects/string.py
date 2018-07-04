@@ -18,6 +18,8 @@
 # or write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+import struct
+
 class String:
     @staticmethod
     def name():
@@ -28,6 +30,7 @@ class String:
         return {
             'new-instance': String.new_instance,
             '<init>([C)V': String.init_from_char_array,
+            '<init>([BI)V': String.init_from_byte_array_and_code,
             'charAt(I)C': String.charat,
             'toCharArray()[C': String.tochararray,
             'intern()Ljava/lang/String;': String.repr_intern,
@@ -47,6 +50,11 @@ class String:
     @staticmethod
     def init_from_char_array(vm, this, args):
         vm[this] = "".join(vm[args[0]])
+
+    @staticmethod
+    def init_from_byte_array_and_code(vm, this, args):
+        """Do not support 'code' for now, it is deprecated."""
+        vm[this] = "".join(struct.pack('>b', x) for x in vm[args[0]])
 
     @staticmethod
     def charat(vm, this, args):
