@@ -131,7 +131,7 @@ class Emulator(object):
         e = time.time() * 1000
         self.stats.preproc = e - s
 
-    def run(self, source_object, args={}, trace=False, vm=None):
+    def run(self, source_object, args=None, trace=False, vm=None):
         """
         Load a smali file and start emulating it.
         :param source_object: A Source() instance containing the source code to run.
@@ -144,8 +144,8 @@ class Emulator(object):
         self.vm = VM(self) if not vm else vm
         self.stats = Stats(self)
 
-        if len(args) > 0:
-            self.vm.variables.update(args)
+        args = {} if not args else eval(args) if not isinstance(args, dict) else args
+        self.vm.variables.update(args)
 
         self.preproc_source(self.source)
 
