@@ -304,6 +304,26 @@ class op_XorIntLit(OpCode):
         vm[vx] = ii ^ OpCode.get_int_value(lit)
 
 
+class op_OrIntLiteral(OpCode):
+
+    def __init__(self):
+        OpCode.__init__(self, '^or-int/lit(\d+) (.+),\s*(.+),\s*(.+)')
+
+    @staticmethod
+    def eval(vm, size, vx, vy, literal):
+        """
+        >>> vm = {'v0': 1, 'v1': 2, 'v2': 16}
+        >>> op_OrIntLiteral.eval(vm, 8, 'v2', 'v1', '0x3')
+        >>> vm == {'v0': 1, 'v1': 2, 'v2': (0x3 | vm['v1'])}
+        True
+        """
+        if isinstance(vm[vy],int):
+            ii = int(vm[vy])
+        else:
+            ii = ord(vm[vy])
+        vm[vx] = ii | OpCode.get_int_value(literal)
+
+
 class op_DivIntLit(OpCode):
     def __init__(self):
         OpCode.__init__(self, '^div-int/lit\d+ (.+),\s*(.+),\s*(.+)')
@@ -562,7 +582,7 @@ class op_RSubIntLiteral(OpCode):
 
 class op_RSubInt(OpCode):
     def __init__(self):
-        OpCode.__init__(self, '^rsub-int\s*(.+),\s*(.+),\s*(.+)')
+        OpCode.__init__(self, '^rsub-int\s+(.+),\s*(.+),\s*(.+)')
 
     @staticmethod
     def eval(vm, destination, source, constant):
@@ -595,6 +615,27 @@ class op_AddInt2Addr(OpCode):
         source1 = vm[source_register]
         source2 = vm[source_and_dest]
         result = source1 + source2
+        vm[source_and_dest] = result
+
+
+class op_OrInt2Addr(OpCode):
+    def __init__(self):
+        OpCode.__init__(self, r'^or-int/2addr (.+),\s*(.+)')
+
+    @staticmethod
+    def eval(vm, source_and_dest, source_register):
+        """
+        >>> vm = {'v0': 1, 'v1': 2, 'v2': 4}
+        >>> op_OrInt2Addr.eval(vm, 'v1', 'v2')
+        >>> vm == {'v0': 1, 'v1': (2 | 4), 'v2': 4}
+        True
+        >>> op_OrInt2Addr.eval(vm, 'v0', 'v1')
+        >>> vm == {'v0': (1 | 2 | 4), 'v1': (2 | 4), 'v2': 4}
+        True
+        """
+        source1 = vm[source_register]
+        source2 = vm[source_and_dest]
+        result = source1 | source2
         vm[source_and_dest] = result
 
 
