@@ -53,8 +53,8 @@ class String:
 
     @staticmethod
     def init_from_byte_array_and_code(vm, this, args):
-        """Do not support 'code' for now, it is deprecated."""
         vm[this] = "".join(struct.pack('>b', x) for x in vm[args[0]])
+        return vm[this]
 
     @staticmethod
     def charat(vm, this, args):
