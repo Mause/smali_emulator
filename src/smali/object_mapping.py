@@ -73,7 +73,7 @@ class ObjectMapping(object):
         if class_name in self.mapping:
             if method_name in self.mapping[class_name]:
                 invokeResult = self.mapping[class_name][method_name](vm, this, args)
-                if not invokeResult is None:
+                if invokeResult is not None:
                     vm.return_v = invokeResult
 
             else:
