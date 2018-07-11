@@ -405,6 +405,21 @@ class op_AndIntLit(OpCode):
         vm[vx] = int(vm[vy]) & OpCode.get_int_value(lit)
 
 
+class op_AndInt2Addr(OpCode):
+    def __init__(self):
+        OpCode.__init__(self, '^and-int/2addr (.+),\s*(.+)')
+
+    @staticmethod
+    def eval(vm, vx, vy):
+        """
+        >>> vm = {'v0': 0xff, 'v1': 0xf0}
+        >>> op_AndInt2Addr.eval(vm, 'v0', 'v1')
+        >>> vm == {'v0': 0xf0, 'v1': 0xf0}
+        True
+        """
+        vm[vx] = int(vm[vy]) & int(vm[vx])
+
+
 class op_OrInt(OpCode):
     def __init__(self):
         OpCode.__init__(self, '^or-int (.+),\s*(.+),\s*(.+)')
@@ -615,6 +630,25 @@ class op_AddInt2Addr(OpCode):
         source1 = vm[source_register]
         source2 = vm[source_and_dest]
         result = source1 + source2
+        vm[source_and_dest] = result
+
+
+class op_SubInt2Addr(OpCode):
+    def __init__(self):
+        OpCode.__init__(self, r'^sub-int/2addr (.+),\s*(.+)')
+
+    @staticmethod
+    def eval(vm, source_and_dest, source_register):
+        """
+        >>> vm = {'v0': 1, 'v1': 2, 'v2': 4}
+        >>> # perform v1 + v2 and store the result into v1
+        >>> op_SubInt2Addr.eval(vm, 'v1', 'v2')
+        >>> vm
+        {'v0': 1, 'v1': -2, 'v2': 4}
+        """
+        source1 = vm[source_register]
+        source2 = vm[source_and_dest]
+        result = source2 - source1
         vm[source_and_dest] = result
 
 
