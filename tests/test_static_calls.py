@@ -20,18 +20,31 @@
 # or write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+# stdlib
+import fnmatch
+import os
+
+# 3d party
 import pytest
 
+# internal
 from .conftest import (
-    opcode_calls,
     run_source,
+    static_method_calls,
 )
 
 @pytest.mark.parametrize(
     'filename, expected_result, input_source',
-    opcode_calls()
+    static_method_calls()
 )
 def test_all_files(filename, expected_result, input_source):
+    test_params = eval(expected_result)
+    expected_result = test_params.pop('ret')
     assert filename.endswith('.smali')
-    assert expected_result == run_source(input_source)
+    assert (
+        expected_result
+        == eval(
+            run_source(input_source, input_params=test_params)
+        )['ret']
+    )
 
