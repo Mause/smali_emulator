@@ -4,7 +4,10 @@ source code listing.
 """
 import re
 
-FIRST_TOKEN = re.compile(r'([\w\-\/]+)')  # first token of a line
+# first token of a line (white space separated tokens)
+
+FIRST_TOKEN = re.compile(r'([\w\-\/]+)') 
+FIELD_PATTERN = re.compile(r'^\.field.*\s+(\w+):(.*)')
 CLASS_PATTERN = re.compile(r'(L?)([a-zA-Z]+[\w\/]+);?')
 
 
@@ -46,3 +49,22 @@ def get_op_code(input_symbol_table_line):
     'cmpl-double'
     """
     return FIRST_TOKEN.search(input_symbol_table_line).group(1)
+
+def get_field_name_and_type(source_line):
+    """Get the field and type of attributes from a given line
+
+    >>> # 'l' is the identifier and type is '[B' (array of bytes)
+    >>> get_field_name_and_type(".field public static l:[B")
+    ('l', '[B')
+    >>> get_field_name_and_type(".field private static r:B")
+    ('r', 'B')
+    """
+    match_object = FIELD_PATTERN.match(source_line)
+    assert match_object is not None
+    return match_object.group(1, 2)
+
+
+def extract_attribute_names(smali_source_code):
+    return [get_field_name_and_type(the_line) 
+            for the_line in smali_source_code.lines
+            if the_line.startswith('.fiel')]
