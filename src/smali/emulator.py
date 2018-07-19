@@ -22,10 +22,16 @@ from __future__ import print_function
 import sys
 import time
 
-import smali.opcodes
+import smali
+
+from smali.opcodes import OpCode
 from smali.vm import VM
 from smali.source import Source, get_source_from_file
-from smali.preprocessors import *
+from smali.preprocessors import (
+    PackedSwitchPreprocessor,
+    TryCatchPreprocessor,
+    ArrayDataPreprocessor,
+)
 
 
 class Stats(object):
