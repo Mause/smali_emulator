@@ -21,12 +21,14 @@
 import struct
 
 class String:
+    """Reproduce the behaviour of the java/lang/String class"""
     @staticmethod
     def name():
         return 'java.lang.String'
 
     @staticmethod
     def methods():
+        """A dict containing the list of available methods for the class."""
         return {
             'new-instance': String.new_instance,
             '<init>([C)V': String.init_from_char_array,
