@@ -3,13 +3,15 @@ A bunch of helper function to help parsing a smali
 source code listing.
 """
 import re
+import smali.source
 
 # first token of a line (white space separated tokens)
 
 FIRST_TOKEN = re.compile(r'([\w\-\/]+)') 
-FIELD_PATTERN = re.compile(r'^\.field.*\s+(\w+):(.*)')
+FIELD_PATTERN = re.compile(r'^\.field.*\s+(\w+):(.*)$')
 CLASS_PATTERN = re.compile(r'(L?)([a-zA-Z]+[\w\/]+);?')
-METHOD_PATTERN = re.compile(r'^\.method.*\s+(.*)\((.*)\)(.*)$')
+START_METHOD_PATTERN = re.compile(r'^\.method.*\s+(.*)\((.*)\)(.*)$')
+END_METHOD_PATTERN = re.compile(r'^\.end method$')
 COMPOSITE_TYPE = re.compile(r'^(L[\w/]+;)')
 ARRAY_TYPE = re.compile(r'^\[')
 
@@ -97,7 +99,6 @@ def parse_argument_list(arglist):
     """
     argument_list = ()
     current_string = arglist
-    current_type = ''
 
     while current_string:
         if ARRAY_TYPE.match(current_string):
@@ -110,7 +111,6 @@ def parse_argument_list(arglist):
             current_type, current_string = get_composite_type(current_string)
 
         argument_list = argument_list + (current_type,)
-        current_type = ''
 
     return argument_list
 
@@ -130,9 +130,35 @@ def get_method_name_and_signature(source_line):
     >>> get_method_name_and_signature(".method public static c(CII)Ljava/lang/Object;")
     ('c', ('C', 'I', 'I'), 'Ljava/lang/Object;')
     """
-    method_name, argument_list, return_type = METHOD_PATTERN.match(source_line).group(1, 2, 3)
+    method_name, argument_list, return_type = START_METHOD_PATTERN.match(source_line).group(1, 2, 3)
     return method_name, parse_argument_list(argument_list), return_type
 
+
+def get_methods_from_smali(smali_source_code):
+    """
+    :param smali_source_code: Source
+    :return: Dict with key/value pairs {(method signature): (method source)}
+    """
+    current_method = None
+    method_body = []
+    result = {}
+    for position, line in enumerate(smali_source_code.lines):
+        if START_METHOD_PATTERN.match(line):
+            # if the method is beginning, start recording lines
+            current_method = get_method_name_and_signature(line)
+
+        if current_method:
+            # if we are inside a method, keep recoding lines
+            method_body.append(line)
+
+        if END_METHOD_PATTERN.match(line):
+            # if we are ending the method, insert the new method in the return dict
+            result[current_method] = smali.source.Source(lines=method_body)
+
+        current_method = None
+        method_body = []
+
+    return result
 
 def extract_attribute_names(smali_source_code):
     return [get_field_name_and_type(the_line) 

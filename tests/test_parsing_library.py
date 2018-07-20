@@ -29,27 +29,32 @@ import pytest
 
 # internals
 from smali.source import get_source_from_file
-from smali.parser import extract_attribute_names
-
-@pytest.mark.parametrize(
-    'filename', [
-        os.path.join(
-            os.path.dirname(__file__), 
-            'completeclass', 
-            'static_obfuscated_parameters.smali'
-        )
-    ]
+from smali.parser import (
+    extract_attribute_names,
+    extract_methods,
 )
+
+@pytest.fixture
+def filename():
+    yield os.path.join(
+        os.path.dirname(__file__),
+        'completeclass',
+        'static_obfuscated_parameters.smali'
+    )
+
 def test_read_attributes_from_class_file(filename):
     source_code = get_source_from_file(filename)
     identifier_list = [
-        field_identifier 
+        field_identifier
         for (field_identifier, field_type) in extract_attribute_names(source_code)
     ]
-    assert all(x in identifier_list 
+    assert all(x in identifier_list
                for x in ('l', 'o', 'p', 'q', 'r', 's', 't', 'u', 'x'))
 
 
 def test_read_method_list_from_class_file(filename):
-    assert False
+    source_code = get_source_from_file(filename)
+    method_list = [method
+                   for (method, input_types, output_types) in extract_methods(source_code)]
+    assert all(x in method_list for x in ('$$d', '$$a', '<init>'))
 
