@@ -134,7 +134,7 @@ def get_method_name_and_signature(source_line):
     return method_name, parse_argument_list(argument_list), return_type
 
 
-def get_methods_from_smali(smali_source_code):
+def extract_methods(smali_source_code):
     """
     :param smali_source_code: Source
     :return: Dict with key/value pairs {(method signature): (method source)}
@@ -154,11 +154,12 @@ def get_methods_from_smali(smali_source_code):
         if END_METHOD_PATTERN.match(line):
             # if we are ending the method, insert the new method in the return dict
             result[current_method] = smali.source.Source(lines=method_body)
-
-        current_method = None
-        method_body = []
+            # reset the parsed content for the next method
+            current_method = None
+            method_body = []
 
     return result
+
 
 def extract_attribute_names(smali_source_code):
     return [get_field_name_and_type(the_line) 
@@ -166,7 +167,7 @@ def extract_attribute_names(smali_source_code):
             if the_line.startswith('.field')]
 
 
-def extract_methods(smali_source_code):
+def extract_method_names_and_signature(smali_source_code):
     return [get_method_name_and_signature(the_line)
             for the_line in smali_source_code.lines
             if the_line.startswith('.method')]

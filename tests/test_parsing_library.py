@@ -31,6 +31,7 @@ import pytest
 from smali.source import get_source_from_file
 from smali.parser import (
     extract_attribute_names,
+    extract_method_names_and_signature,
     extract_methods,
 )
 
@@ -55,6 +56,12 @@ def test_read_attributes_from_class_file(filename):
 def test_read_method_list_from_class_file(filename):
     source_code = get_source_from_file(filename)
     method_list = [method
-                   for (method, input_types, output_types) in extract_methods(source_code)]
+                   for (method, input_types, output_types) in extract_method_names_and_signature(source_code)]
     assert all(x in method_list for x in ('$$d', '$$a', '<init>'))
 
+
+def test_read_method_list_and_method_extraction(filename):
+    source_code = get_source_from_file(filename)
+    method_list = extract_method_names_and_signature(source_code)
+    method_with_code = extract_methods(source_code)
+    assert set(method_with_code.keys()) == set(method_list)

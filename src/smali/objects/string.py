@@ -55,8 +55,9 @@ class String:
 
     @staticmethod
     def init_from_byte_array_and_code(vm, this, args):
+        assert len(args) == 2, "<init>([BI) takes 2 arguments"
         vm[this] = "".join(struct.pack('>b', x) for x in vm[args[0]])
-        return vm[this]
+        vm.return_v = vm[this]
 
     @staticmethod
     def charat(vm, this, args):
