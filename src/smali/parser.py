@@ -55,6 +55,7 @@ def get_op_code(input_symbol_table_line):
     """
     return FIRST_TOKEN.search(input_symbol_table_line).group(1)
 
+
 def get_field_name_and_type(source_line):
     """Get the field and type of attributes from a given line.
 
@@ -67,6 +68,7 @@ def get_field_name_and_type(source_line):
     match_object = FIELD_PATTERN.match(source_line)
     assert match_object is not None
     return match_object.group(1, 2)
+
 
 def get_composite_type(current_string):
     """Return the type of the first element in the string.
@@ -83,6 +85,7 @@ def get_composite_type(current_string):
         (is_match.group(1), current_string.lstrip(is_match.group(1))) if is_match 
         else (current_string[0], current_string[1:])
     )
+
 
 def parse_argument_list(arglist):
     """Parse a smali argument list as given in smali method 
