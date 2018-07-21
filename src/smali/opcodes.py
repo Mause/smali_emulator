@@ -17,9 +17,11 @@
 # or write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 from __future__ import print_function
+from __future__ import division
 
-import re
 import ast
+import re
+import struct
 
 # TODO: Implement missing opcodes.
 
@@ -77,7 +79,7 @@ class op_ConstString(OpCode):
 
     @staticmethod
     def eval(vm, vx, s):
-        vm[vx] = s.decode('unicode_escape')
+        vm[vx] = s.encode('utf-8')
 
 
 class op_Move(OpCode):
@@ -330,7 +332,7 @@ class op_DivIntLit(OpCode):
 
     @staticmethod
     def eval(vm, vx, vy, lit):
-        vm[vx] = vm[vy] / OpCode.get_int_value(lit)
+        vm[vx] = vm[vy] // OpCode.get_int_value(lit)
 
 
 class op_DivInt(OpCode):
@@ -339,7 +341,7 @@ class op_DivInt(OpCode):
 
     @staticmethod
     def eval(vm, vx, vy, vz):
-        vm[vx] = vm[vy] / vm[vz]
+        vm[vx] = vm[vy] // vm[vz]
 
 
 class op_DivIntLit(OpCode):
@@ -348,7 +350,7 @@ class op_DivIntLit(OpCode):
 
     @staticmethod
     def eval(vm, vx, vy, lit):
-        vm[vx] = vm[vy] / OpCode.get_int_value(lit)
+        vm[vx] = vm[vy] // OpCode.get_int_value(lit)
 
 
 class op_AddInt(OpCode):
@@ -503,11 +505,9 @@ class op_IntToType(OpCode):
     @staticmethod
     def eval(vm, ctype, vx, vy):
         if ctype == 'char':
-            vm[vx] = chr( vm[vy] & 0xFF )
+            vm[vx] = chr(vm[vy] & 0xFFFF)
         elif ctype == 'byte' :
-            a = vm[vy]
-            a1 = a << 24
-            vm[vx] = a1 >> 24
+            vm[vx] = struct.pack('>i', vm[vy])[-1]
         else:
             vm.emu.fatal("Unsupported type '%s' ." % ctype)
 

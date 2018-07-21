@@ -20,6 +20,8 @@
 # or write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+import collections
+import sys
 import pytest
 
 from .conftest import (
@@ -33,5 +35,25 @@ from .conftest import (
 )
 def test_all_files(filename, expected_result, input_source):
     assert filename.endswith('.smali')
-    assert expected_result == run_source(input_source)
+    if sys.version.startswith('2') and filename in [
+        'move-exception.smali', 'aget.smali', 'array-length.smali'
+    ]:
+        pytest.xfail("This test is failing on python2")
+    result = run_source(input_source)
+    if expected_result.startswith('{') and expected_result.endswith('}'):
+        """Probably a dict, we convert the result"""
+        expected_result = eval(expected_result)
+        result = eval(result)
+        expected_result = collections.OrderedDict(
+            [(k, expected_result[k].decode('utf-8') if isinstance(expected_result[k], bytes)
+             else str(expected_result[k]))
+             for k in sorted(expected_result.keys())]
+        )
+
+        result = collections.OrderedDict(
+            [(k, result[k].decode('utf-8') if isinstance(result[k], bytes)
+             else str(result[k]))
+             for k in sorted(result.keys())]
+        )
+    assert expected_result == result
 

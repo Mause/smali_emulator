@@ -27,10 +27,10 @@ def extract_class_name(class_descriptor_string):
     :param name: The name of the class to be demangled.
     :return: The demangled class name.
 
-    >>> extract_class_name('Ljava/lang/String;->charAt(I)C')
+    >>> extract_class_name('Ljava/lang/String;->charAt(I)C')  # doctest: +SKIP
     Traceback (most recent call last):
-      File "<stdin>", line 1, in <module>
-    IncorrectPattern: 'Ljava/lang/String;->charAt(I)C' Does not correspond to a class.
+        ...
+    smali.parser.IncorrectPattern: 'Ljava/lang/String;->charAt(I)C' Does not correspond to a class.
     >>> extract_class_name('Ljava/lang/reflect/Method;')
     'java.lang.reflect.Method'
     """

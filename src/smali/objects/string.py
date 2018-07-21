@@ -56,18 +56,18 @@ class String:
     @staticmethod
     def init_from_byte_array_and_code(vm, this, args):
         assert len(args) == 2, "<init>([BI) takes 2 arguments"
-        vm[this] = "".join(struct.pack('>b', x) for x in vm[args[0]])
+        vm[this] = b"".join(struct.pack('>b', ord(x) if isinstance(x, str) else x) for x in vm[args[0]])
         vm.return_v = vm[this]
 
     @staticmethod
     def charat(vm, this, args):
         idx = vm[args[0]]
         obj = vm[this]
-        vm.return_v = obj[idx]
+        vm.return_v = chr(obj[idx]) if isinstance(obj[idx], int) else obj[idx]
 
     @staticmethod
     def tochararray(vm, this, args):
-        vm.return_v = list(vm[this])
+        vm.return_v = [chr(x)  if isinstance(x, int) else x for x in vm[this]]
 
     @staticmethod
     def length(vm, this, args):

@@ -1,4 +1,4 @@
-# {'i': 100, 'a': IndexError('string index out of range',), 's': u'hello', 'ret': None}
+# {'i': 100, 'a': IndexError('index out of range',), 's': u'hello', 'ret': None}
 const-string s, "hello"
 const/12 i, 100
 

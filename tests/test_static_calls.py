@@ -20,9 +20,7 @@
 # or write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-# stdlib
-import fnmatch
-import os
+from __future__ import unicode_literals
 
 # 3d party
 import pytest
@@ -45,6 +43,6 @@ def test_all_files(filename, expected_result, input_source):
         expected_result
         == eval(
             run_source(input_source, input_params=test_params)
-        )['ret']
+        )['ret'].decode('ascii')
     )
 
