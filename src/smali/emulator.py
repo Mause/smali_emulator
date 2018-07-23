@@ -57,10 +57,16 @@ class Emulator(object):
     Instanciate this if you want to do some work on the smali file."""
     def __init__(self, **kwargs):
         # Code preprocessors.
-        self.preprocessors = [TryCatchPreprocessor, PackedSwitchPreprocessor, ArrayDataPreprocessor]
+        self.preprocessors = [
+            TryCatchPreprocessor,
+            PackedSwitchPreprocessor,
+            ArrayDataPreprocessor
+        ]
 
         self.opcodes = []  # Opcodes handlers.
-        for op_code_symbol in [entry for entry in dir(smali.opcodes) if entry.startswith('op_')]:
+        for op_code_symbol in [
+            entry for entry in dir(smali.opcodes) if entry.startswith('op_')
+        ]:
             self.opcodes.append(getattr(smali.opcodes, op_code_symbol)())
 
         self.vm = kwargs.get('vm') or VM(self)           # Instance of the virtual machine.
@@ -173,4 +179,9 @@ class Emulator(object):
         self.stats.execution = e - s
 
         return self.vm.return_v
+
+
+class FrameEmulator(Emulator):
+    """Emulator Instance intended to run internal method of a class."""
+    pass
 
