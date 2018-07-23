@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 from __future__ import print_function
 
+import re
 import sys
 import time
 import warnings
@@ -145,7 +146,7 @@ class Emulator(object):
     def load_class(self, filename, trace=False):
         self.javaclass = smali.javaclass.JavaClass(filename)
 
-    def exec_method(self, method_name, args=None, trace=False):
+    def exec_method(self, method_name, args=None, trace=False, vm=None):
         """Exec the method given the method_name and a list of arguments from
         current javaclass."""
         arg_length = len(args) if args else 0
@@ -162,7 +163,14 @@ class Emulator(object):
         # of the method being executed.
         assert len(candidate_methods) == 1, "Too much methods for this number of arguments"
         method = candidate_methods[0]
-        return self.run(method, args=args, trace=trace)
+        result = self.run(method, args=args, trace=trace, vm=vm)
+        backup_vm = self.vm
+        self.vm = VM(self)  # instanciate a new VM because we are on a new frame
+        local_var_name = re.compile('(p|v)\d+')
+        self.vm.variables.update(
+            {k: v for k, v in backup_vm.variables.items() if not local_var_name.match(k)}
+        )
+        return result
 
     def preproc_source(self, source_object=None):
         """Preprocess labels and try/catch blocks for fast lookup."""
