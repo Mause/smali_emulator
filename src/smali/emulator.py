@@ -21,8 +21,10 @@ from __future__ import print_function
 
 import sys
 import time
+import warnings
 
 import smali
+import smali.javaclass
 
 from smali.opcodes import OpCode
 from smali.vm import VM
@@ -72,6 +74,7 @@ class Emulator(object):
         self.vm = kwargs.get('vm') or VM(self)           # Instance of the virtual machine.
         self.source = kwargs.get('source')               # Instance of the source file.
         self.stats = kwargs.get('stats') or Stats(self)  # Instance of the statistics object.
+        self.javaclass = javaclass.JavaClass(kwargs.get('filename')) if kwargs.get('filename') else None
 
     def __preprocess(self):
         """
@@ -130,10 +133,36 @@ class Emulator(object):
         sys.exit()
 
     def run_file(self, filename, args={}, trace=False):
+        warnings.warn("This feature is deprecated, use load_class and exec_method instead",
+                      DeprecationWarning)
         return self.run(get_source_from_file(filename), args, trace)
 
     def run_source(self, source_code, args={}, trace=False):
+        warnings.warn("This feature is deprecated, use load_class and exec_method instead",
+                      DeprecationWarning)
         return self.run(Source(lines=source_code), args, trace)
+
+    def load_class(self, filename, trace=False):
+        self.javaclass = smali.javaclass.JavaClass(filename)
+
+    def exec_method(self, method_name, args=None, trace=False):
+        """Exec the method given the method_name and a list of arguments from
+        current javaclass."""
+        arg_length = len(args) if args else 0
+
+        # TODO: check input argument type here
+        candidate_methods = [
+            self.javaclass.methods[(method_name, input_types, output_type)]
+            for method, input_types, output_type in self.javaclass.methods 
+            if method == method_name and arg_length == len(input_types)
+        ]
+
+        # If the following assert fails, it means that we must refine the 
+        # search by matching the type of the input arguments with the input signature
+        # of the method being executed.
+        assert len(candidate_methods) == 1, "Too much methods for this number of arguments"
+        method = candidate_methods[0]
+        return self.run(method, args=args, trace=trace)
 
     def preproc_source(self, source_object=None):
         """Preprocess labels and try/catch blocks for fast lookup."""
@@ -144,8 +173,8 @@ class Emulator(object):
         self.stats.preproc = e - s
 
     def run(self, source_object, args=None, trace=False, vm=None):
-        """
-        Load a smali file and start emulating it.
+        """Load a smali file and start emulating it.
+
         :param source_object: A Source() instance containing the source code to run.
         :param args: A dictionary of optional initialization variables for the VM, used for arguments.
         :param trace: If true every opcode being executed will be printed.
@@ -158,7 +187,6 @@ class Emulator(object):
 
         args = {} if not args else eval(args) if not isinstance(args, dict) else args
         self.vm.variables.update(args)
-
         self.preproc_source(self.source)
 
         # Loop each line and emulate.
